@@ -44,8 +44,8 @@ jwt.secret=your_jwt_secret_key
 mvn spring-boot:run
 
 ## 📄 API Docs
-Swagger: http://localhost:8080/swagger-ui/index.html
-OpenAPI: http://localhost:8080/v3/api-docs
+Swagger: http://localhost:8082/swagger-ui/index.html
+OpenAPI: http://localhost:8082/v3/api-docs
 
 ## 📁 Folder Structure
 src/
