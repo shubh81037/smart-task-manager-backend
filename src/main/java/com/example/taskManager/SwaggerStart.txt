@@ -1,0 +1,77 @@
+To enable swagger following things needs to be done ->
+
+1.Application.properties --
+-----------------------------
+# Springdoc configuration
+springdoc.swagger-ui.enabled=true
+springdoc.api-docs.enabled=true
+springdoc.api-docs.path=/v3/api-docs
+
+Enables Swagger UI and OpenAPI documentation generation.
+
+2.Pom.xml --
+------------
+<!-- Springdoc OpenAPI UI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
+Provides springdoc library that generates OpenAPI docs from your Spring Boot REST endpoints.
+
+3.Advice -> ExceptionHandler class --
+---------------------------------------
+
+change from @ControllerAdvice to @Component
+Reason -->
+The problem is the @ControllerAdvice annotation. Springdoc 2.4.0 and 2.5.0 are trying to scan
+all ControllerAdvice beans and hitting a constructor mismatch in Spring 6.2.12.
+change @ControllerAdvice to @Component so it's not treated as advice,
+and move error handling to the controller level:
+
+Note: The @ExceptionHandler methods no longer work as global exception handlers. To restore this functionality, you'd need to either:
+Use @RestControllerAdvice with proper Spring 6.2.12 compatibility (requires testing)
+Handle exceptions at the controller level
+
+4.SecurityConfig --
+--------------------
+
+.requestMatchers("/api/auth/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+
+ Tells Spring Security to allow unauthenticated access to all swagger endpoints
+ without requiring JWT token.
+
+
+5.JwtAuthenticationFilter --
+-----------------------------
+
+include swagger and api-docs api to by-pass from the jwtAuth filter -->
+
+ path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") ||
+ path.startsWith("/swagger-resources") || path.startsWith("/webjars")
+
+
+ The JWT filter is applied before Spring Security rules. This tells the filter to skip JWT
+ validation for swagger paths, so requests aren't blocked with "Missing Authorization header" errors.
+
+
+How this Work
+--------------
+
+Request to /v3/api-docs
+    ↓
+JwtAuthenticationFilter.shouldNotFilter() returns TRUE
+    ↓ (Filter skipped, no JWT required)
+SecurityConfig.permitAll() allows request
+    ↓
+Springdoc generates OpenAPI JSON
+    ↓
+HTTP 200 returned ✅

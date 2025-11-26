@@ -1,0 +1,10 @@
+package com.example.taskManager.model;
+
+public enum TaskStatus 
+{
+    PENDING,
+    IN_PROGRESS,
+    COMPLETED,
+    CANCELLED
+
+}
