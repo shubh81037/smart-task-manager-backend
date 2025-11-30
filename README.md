@@ -39,6 +39,9 @@ spring.datasource.username=your_db_user
 spring.datasource.password=your_db_password
 jwt.secret=your_jwt_secret_key
 
+### Manually Create Database In MYSQL
+run - create database taskdb ;
+
 ### Run
 mvn spring-boot:run
 
